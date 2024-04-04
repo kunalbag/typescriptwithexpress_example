@@ -6,7 +6,7 @@ import { ApiResponse } from './APIResponse';
 import { ErrorHandler } from './ErrorHandler';
 import { HttpStatusCode } from './HttpStatusCode';
 
-export async function insertRecord(req: Request, res: Response) {
+export async function insertRecord (req: Request, res: Response) : Promise<Response>{
     const newRecord: User = req.body;
     const conn = await connect();
     try{
@@ -22,10 +22,10 @@ export async function insertRecord(req: Request, res: Response) {
     }  
 }
 
-export async function getAllRecords(req: Request, res: Response) {
+export async function getAllRecords(req: Request, res: Response) : Promise<Response> {
     const conn = await connect();
     try{
-    const posts = await conn.query("SELECT * FROM emp");
+    const posts : [QueryResult, FieldPacket[]] = await conn.query("SELECT * FROM emp");
     if(JSON.stringify(posts[0]) === '[]'){
         const errorResponse = new ApiResponse(HttpStatusCode.NotFound, "No record found..");
         res.statusCode = errorResponse.statusCode;
@@ -34,7 +34,7 @@ export async function getAllRecords(req: Request, res: Response) {
     return res.json(posts[0]);
     }
     catch(e){
-        const errorResponse = new ApiResponse(HttpStatusCode.NotFound, "Unable to find records");
+        const errorResponse = new ApiResponse(HttpStatusCode.InternalServerError, "Unable to find records");
         res.statusCode = errorResponse.statusCode;
         return res.json(errorResponse);
     }
@@ -44,7 +44,7 @@ export async function getRecordByEmpId (req: Request, res: Response): Promise<Re
     const id = req.params.empId;
     const conn = await connect();
     try{
-    const posts = await conn.query("SELECT * FROM emp WHERE id = ?", id);
+    const posts : [QueryResult, FieldPacket[]] = await conn.query("SELECT * FROM emp WHERE id = ?", id);
     if(JSON.stringify(posts[0]) === '[]'){
         const errorResponse = new ApiResponse(HttpStatusCode.NotFound, "No record found for id =" + id);
         res.statusCode = errorResponse.statusCode;
@@ -58,12 +58,12 @@ export async function getRecordByEmpId (req: Request, res: Response): Promise<Re
     }
 }
 
-export async function updateRecordByEmpId(req: Request, res: Response) {
+export async function updateRecordByEmpId(req: Request, res: Response) : Promise<Response>{
     const id = req.params.empId;
     const updatePost: User = req.body;
     const conn = await connect();
     try{
-    const posts = await conn.query("UPDATE emp SET ? WHERE id = ?", [updatePost, id])
+    const posts : [QueryResult, FieldPacket[]] = await conn.query("UPDATE emp SET ? WHERE id = ?", [updatePost, id])
     const outputJson = JSON.parse(JSON.stringify(posts));
     const affectedRows = outputJson[0].affectedRows;
     if(affectedRows === 0){
@@ -87,11 +87,11 @@ export async function updateRecordByEmpId(req: Request, res: Response) {
     
 }
 
-export async function deleteRecordByEmpId(req: Request, res: Response) {
+export async function deleteRecordByEmpId(req: Request, res: Response) : Promise<Response>{
     const id = req.params.empId;
     const conn = await connect();
     try{
-    const posts = await conn.query("DELETE FROM emp WHERE id = ?", id);
+    const posts : [QueryResult, FieldPacket[]] = await conn.query("DELETE FROM emp WHERE id = ?", id);
     const outputJson = JSON.parse(JSON.stringify(posts));
     const affectedRows = outputJson[0].affectedRows;
     if(affectedRows === 0){
@@ -114,11 +114,11 @@ export async function deleteRecordByEmpId(req: Request, res: Response) {
     }
 }
 
-export async function deleteAllRecords(req: Request, res: Response) {
+export async function deleteAllRecords(req: Request, res: Response) : Promise<Response>{
     //const id = req.params.empId;
     const conn = await connect();
     try{
-    const posts = await conn.query("DELETE FROM emp");
+    const posts : [QueryResult, FieldPacket[]] = await conn.query("DELETE FROM emp");
     const outputJson = JSON.parse(JSON.stringify(posts));
     const affectedRows = outputJson[0].affectedRows;
     if(affectedRows === 0){
