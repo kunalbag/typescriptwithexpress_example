@@ -11,6 +11,7 @@ export class ErrorHandler{
         if(this.sqlState == 23000){
             return "Duplicate entry found.."
         }
+        //placeholder
         return this.sqlMessage;
     }
 }

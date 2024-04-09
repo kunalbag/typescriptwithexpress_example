@@ -16,7 +16,14 @@ export async function insertRecord (req: Request, res: Response) : Promise<Respo
     });
     } catch(e){
         const obj = JSON.parse(JSON.stringify(e));
-        const errorResponse = new ApiResponse(HttpStatusCode.InternalServerError, new ErrorHandler(obj.sqlState,obj.sqlMessage).getSqlMessage());
+        let res_code : number= HttpStatusCode.InternalServerError;
+        if(obj.code === 'ER_BAD_FIELD_ERROR' || 'ER_PARSE_ERROR'){
+            res_code = HttpStatusCode.BadRequest;
+        }
+        if(obj.code === 'ER_DUP_ENTRY'){
+            res_code = HttpStatusCode.Conflict;
+        }
+        const errorResponse = new ApiResponse(res_code, new ErrorHandler(obj.sqlState,obj.sqlMessage).getSqlMessage());
         res.statusCode= errorResponse.statusCode;
         return  res.json(errorResponse);
     }  
@@ -75,12 +82,12 @@ export async function updateRecordByEmpId(req: Request, res: Response) : Promise
         message: "Record updated successfully.."
     })
     } catch(e){
-        if(e instanceof Error){
-        const errorResponse = new ApiResponse(HttpStatusCode.InternalServerError, "Unable to update record", e.message);
-        res.statusCode = errorResponse.statusCode;
-        return res.json(errorResponse);
+        const obj = JSON.parse(JSON.stringify(e));
+        let res_code : number= HttpStatusCode.InternalServerError;
+        if(obj.code === 'ER_BAD_FIELD_ERROR' || 'ER_PARSE_ERROR'){
+            res_code = HttpStatusCode.BadRequest;
         }
-        const errorResponse = new ApiResponse(HttpStatusCode.InternalServerError, "Unable to update record", e);
+        const errorResponse = new ApiResponse(res_code, "Unable to update record", e);
         res.statusCode = errorResponse.statusCode;
         return res.json(errorResponse);
     }
@@ -103,11 +110,6 @@ export async function deleteRecordByEmpId(req: Request, res: Response) : Promise
         message: "Record deleted successfully.."
     })
     } catch(e){
-        if(e instanceof Error){
-            const errorResponse = new ApiResponse(HttpStatusCode.InternalServerError, "Unable to delete record", e.message);
-            res.statusCode = errorResponse.statusCode;
-            return res.json(errorResponse);
-            }
             const errorResponse = new ApiResponse(HttpStatusCode.InternalServerError, "Unable to delete record", e);
             res.statusCode = errorResponse.statusCode;
             return res.json(errorResponse);
@@ -130,11 +132,6 @@ export async function deleteAllRecords(req: Request, res: Response) : Promise<Re
         message: "Records are deleted successfully.."
     })
     } catch(e){
-        if(e instanceof Error){
-            const errorResponse = new ApiResponse(HttpStatusCode.InternalServerError, "Unable to delete records", e.message);
-            res.statusCode = errorResponse.statusCode;
-            return res.json(errorResponse);
-            }
             const errorResponse = new ApiResponse(HttpStatusCode.InternalServerError, "Unable to delete records", e);
             res.statusCode = errorResponse.statusCode;
             return res.json(errorResponse);
