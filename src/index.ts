@@ -3,6 +3,8 @@ import dotenv  from 'dotenv';
 dotenv.config();
 // Import the PostsRoutes from the post.routes file
 import routes from "./routes/routes";
+import authenticate from "./middleware/authenticate"
+import DataValidation from "./middleware/datavalidation";
 
 
 
@@ -16,7 +18,11 @@ console.log("PORT in env file is: " + process.env.PORT);
 app.use(express.json());
 
 // Use the PostsRoutes for any routes starting with /posts
-app.use("/",routes);
+
+app.use("/",[authenticate,DataValidation],routes);
+//.use("/",DataValidation,routes);
+//app.use("/",DataValidation,routes);
+
 
 // Start the server
 app.listen(PORT, () => {
